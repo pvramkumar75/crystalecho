@@ -1,0 +1,646 @@
+/* ============================================
+   CrystalEcho — Mystic Design System
+   Dark Cosmic Lithotherapy UI
+   ============================================ */
+
+/* --- CSS Reset & Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Cosmic Palette */
+  --void: #0a0a0f;
+  --abyss: #0d0d14;
+  --obsidian: #111118;
+  --nebula: #16161f;
+  --twilight: #1c1c28;
+  --dusk: #252533;
+  --mist: #3a3a50;
+  --smoke: #5a5a78;
+  --ash: #8888a8;
+  --pearl: #b8b8d0;
+  --moonlight: #e0e0f0;
+  --starlight: #f0f0ff;
+
+  /* Accent Colors */
+  --amethyst: #9b59ff;
+  --amethyst-glow: #7c3aed;
+  --amethyst-deep: #5b21b6;
+  --amethyst-light: #c4b5fd;
+  --rose-quartz: #f472b6;
+  --rose-quartz-glow: #ec4899;
+  --citrine: #fbbf24;
+  --citrine-glow: #f59e0b;
+  --aquamarine: #22d3ee;
+  --aquamarine-glow: #06b6d4;
+  --emerald: #34d399;
+  --emerald-glow: #10b981;
+  --lapis: #818cf8;
+  --lapis-glow: #6366f1;
+
+  /* Gradients */
+  --gradient-cosmic: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0d0d14 100%);
+  --gradient-aurora: linear-gradient(135deg, rgba(155,89,255,0.15) 0%, rgba(34,211,238,0.08) 50%, rgba(244,114,182,0.12) 100%);
+  --gradient-oracle: linear-gradient(180deg, rgba(155,89,255,0.2) 0%, rgba(99,102,241,0.1) 50%, transparent 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+  --gradient-amethyst: linear-gradient(135deg, #9b59ff 0%, #6366f1 100%);
+  --gradient-rose: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-hover-bg: rgba(255, 255, 255, 0.06);
+  --glass-hover-border: rgba(155, 89, 255, 0.2);
+
+  /* Shadows */
+  --shadow-glow: 0 0 60px rgba(155, 89, 255, 0.15);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 24px 80px rgba(0, 0, 0, 0.5);
+
+  /* Spacing */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-xl: 48px;
+  --radius-2xl: 64px;
+
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', 'Georgia', serif;
+  --font-sans: 'Inter', -apple-system, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--void);
+  color: var(--pearl);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .serif {
+  font-family: var(--font-serif);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--mist);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--amethyst-deep);
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-8px) rotate(1deg); }
+  66% { transform: translateY(-4px) rotate(-1deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(155, 89, 255, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(155, 89, 255, 0.4), 0 0 80px rgba(155, 89, 255, 0.1); }
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes aurora {
+  0%, 100% { opacity: 0.3; transform: translateX(0) scale(1); }
+  25% { opacity: 0.5; transform: translateX(30px) scale(1.1); }
+  50% { opacity: 0.4; transform: translateX(-20px) scale(1.05); }
+  75% { opacity: 0.6; transform: translateX(10px) scale(0.95); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.5s ease-out forwards;
+}
+
+.animate-slide-right {
+  animation: slideRight 0.6s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-orbit {
+  animation: orbit 20s linear infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
+.animate-aurora {
+  animation: aurora 8s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 30s linear infinite;
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+/* Stagger Delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
+.delay-1000 { animation-delay: 1000ms; }
+.delay-1200 { animation-delay: 1200ms; }
+.delay-1500 { animation-delay: 1500ms; }
+.delay-2000 { animation-delay: 2000ms; }
+
+/* --- Glass Morphism Components --- */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass:hover {
+  background: var(--glass-hover-bg);
+  border-color: var(--glass-hover-border);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--radius-lg);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: linear-gradient(135deg, rgba(155,89,255,0.06) 0%, rgba(255,255,255,0.03) 100%);
+  border-color: rgba(155, 89, 255, 0.15);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-4px);
+}
+
+/* --- Mystic Background Effects --- */
+.cosmic-bg {
+  background: var(--gradient-cosmic);
+  position: relative;
+}
+
+.cosmic-bg::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse 800px 600px at 20% 20%, rgba(155,89,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 80% 60%, rgba(34,211,238,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 500px at 50% 90%, rgba(244,114,182,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Star field */
+.starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+/* --- Oracle Section Special --- */
+.oracle-container {
+  position: relative;
+  background: linear-gradient(180deg, rgba(155,89,255,0.04) 0%, rgba(99,102,241,0.02) 50%, transparent 100%);
+  border: 1px solid rgba(155, 89, 255, 0.1);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+}
+
+.oracle-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--amethyst), transparent);
+}
+
+.oracle-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  color: var(--starlight);
+  font-family: var(--font-serif);
+  font-style: italic;
+  transition: all 0.4s ease;
+  resize: none;
+}
+
+.oracle-input:focus {
+  outline: none;
+  border-color: rgba(155, 89, 255, 0.3);
+  box-shadow: 0 0 40px rgba(155, 89, 255, 0.1), inset 0 0 20px rgba(155, 89, 255, 0.05);
+}
+
+.oracle-input::placeholder {
+  color: var(--mist);
+  font-style: italic;
+}
+
+.oracle-button {
+  background: var(--gradient-amethyst);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.oracle-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.6s ease;
+}
+
+.oracle-button:hover::before {
+  left: 100%;
+}
+
+.oracle-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(155, 89, 255, 0.4);
+}
+
+.oracle-button:disabled {
+  background: var(--twilight);
+  color: var(--mist);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- Prescription Result Card --- */
+.prescription-card {
+  background: linear-gradient(135deg, rgba(155,89,255,0.06) 0%, rgba(34,211,238,0.03) 100%);
+  border: 1px solid rgba(155, 89, 255, 0.12);
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.prescription-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amethyst-light), transparent);
+}
+
+/* --- Chakra Cards --- */
+.chakra-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+.chakra-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.chakra-orb {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  opacity: 0.3;
+  transition: all 0.5s ease;
+}
+
+.chakra-card:hover .chakra-orb {
+  opacity: 1;
+  box-shadow: 0 0 30px currentColor;
+}
+
+/* --- Moon Section --- */
+.moon-section {
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(155,89,255,0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.moon-orb {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8e0f0 0%, #c0b0d8 50%, #8878a8 100%);
+  box-shadow: 0 0 80px rgba(200, 180, 240, 0.2), 0 0 160px rgba(155, 89, 255, 0.1);
+}
+
+/* --- Scanner Section --- */
+.scanner-dropzone {
+  background: var(--glass-bg);
+  border: 2px dashed rgba(155, 89, 255, 0.2);
+  border-radius: var(--radius-2xl);
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+.scanner-dropzone:hover {
+  border-color: rgba(155, 89, 255, 0.5);
+  background: rgba(155, 89, 255, 0.05);
+  box-shadow: inset 0 0 60px rgba(155, 89, 255, 0.05);
+}
+
+/* --- Navigation --- */
+.nav-glass {
+  background: rgba(10, 10, 15, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.nav-item {
+  padding: 8px 20px;
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 900;
+  transition: all 0.3s ease;
+  color: var(--smoke);
+  border: 1px solid transparent;
+}
+
+.nav-item:hover {
+  color: var(--starlight);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-item.active {
+  color: white;
+  background: var(--gradient-amethyst);
+  box-shadow: 0 4px 20px rgba(155, 89, 255, 0.3);
+}
+
+/* --- Footer --- */
+.footer-section {
+  background: var(--abyss);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* --- Tags & Badges --- */
+.mystic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  background: rgba(155, 89, 255, 0.1);
+  border: 1px solid rgba(155, 89, 255, 0.2);
+  color: var(--amethyst-light);
+}
+
+/* --- Spinner --- */
+.mystic-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(155, 89, 255, 0.1);
+  border-top-color: var(--amethyst);
+  border-radius: 50%;
+  animation: spin-slow 1s linear infinite;
+}
+
+/* --- Crystal Collection Grid --- */
+.crystal-grid-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crystal-grid-card:hover {
+  border-color: rgba(155, 89, 255, 0.2);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), 0 0 40px rgba(155, 89, 255, 0.1);
+}
+
+.crystal-grid-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.crystal-grid-card:hover img {
+  transform: scale(1.1);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 3.5rem !important;
+  }
+}
+
+/* --- Utility --- */
+.text-gradient {
+  background: var(--gradient-amethyst);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-rose {
+  background: var(--gradient-rose);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amethyst), transparent);
+  opacity: 0.5;
+}
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  margin: 0 auto;
+  max-width: 80%;
+}
+
+/* Zodiac wheel */
+.zodiac-ring {
+  border: 1px solid rgba(155, 89, 255, 0.15);
+  border-radius: 50%;
+  position: relative;
+}
+
+.zodiac-symbol {
+  position: absolute;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.zodiac-symbol:hover {
+  transform: scale(1.3);
+  text-shadow: 0 0 20px var(--amethyst);
+}
+
+/* History chat bubbles */
+.oracle-history-item {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.oracle-history-item:hover {
+  background: rgba(155,89,255,0.05);
+  border-color: rgba(155,89,255,0.15);
+}
+
+/* Daily Crystal Banner */
+.daily-crystal-banner {
+  background: linear-gradient(135deg, rgba(155,89,255,0.08) 0%, rgba(52,211,153,0.06) 50%, rgba(251,191,36,0.06) 100%);
+  border: 1px solid rgba(155, 89, 255, 0.1);
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.daily-crystal-banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--emerald), var(--citrine), var(--amethyst), transparent);
+  opacity: 0.4;
+}

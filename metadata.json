@@ -1,0 +1,7 @@
+{
+  "name": "CrystalEcho: Lithotherapy Healing Handbook",
+  "description": "An elegant and comprehensive guide to lithotherapy, featuring AI-powered crystal identification, gemstone prescriptions, and lunar charging guidance.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
