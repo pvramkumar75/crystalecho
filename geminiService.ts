@@ -1,44 +1,127 @@
 
 import { Prescription, IdentificationResult } from "./types";
 
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
-const MODEL = 'deepseek-chat';
+// ─── Provider Configuration ───
+export type AIProvider = 'deepseek' | 'gemini' | 'groq';
 
-interface DeepSeekMessage {
+interface ProviderConfig {
+  name: string;
+  icon: string;
+  description: string;
+}
+
+export const AI_PROVIDERS: Record<AIProvider, ProviderConfig> = {
+  deepseek: { name: 'DeepSeek', icon: '🌊', description: 'DeepSeek Chat — Fast & capable' },
+  gemini: { name: 'Gemini', icon: '✦', description: 'Google Gemini 2.0 Flash' },
+  groq: { name: 'Groq', icon: '⚡', description: 'Groq LLaMA — Ultra fast inference' },
+};
+
+let currentProvider: AIProvider = 'deepseek';
+
+export const setProvider = (p: AIProvider) => { currentProvider = p; };
+export const getProvider = (): AIProvider => currentProvider;
+
+// ─── API Keys & Endpoints ───
+const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY || '';
+const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
+const GROQ_KEY = process.env.GROQ_API_KEY || '';
+
+// ─── Universal Chat Interface ───
+interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
-async function callDeepSeek(messages: DeepSeekMessage[], jsonMode: boolean = false): Promise<string> {
+async function callAI(messages: ChatMessage[], jsonMode: boolean = false): Promise<string> {
+  switch (currentProvider) {
+    case 'deepseek': return callDeepSeek(messages, jsonMode);
+    case 'gemini': return callGemini(messages, jsonMode);
+    case 'groq': return callGroq(messages, jsonMode);
+    default: return callDeepSeek(messages, jsonMode);
+  }
+}
+
+// ─── DeepSeek (OpenAI-compatible) ───
+async function callDeepSeek(messages: ChatMessage[], jsonMode: boolean): Promise<string> {
   const body: Record<string, unknown> = {
-    model: MODEL,
+    model: 'deepseek-chat',
     messages,
     temperature: 0.7,
     max_tokens: 2048,
   };
-  if (jsonMode) {
-    body.response_format = { type: 'json_object' };
-  }
+  if (jsonMode) body.response_format = { type: 'json_object' };
 
-  const response = await fetch(DEEPSEEK_API_URL, {
+  const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-    },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
     body: JSON.stringify(body),
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`DeepSeek API Error (${response.status}): ${errorText}`);
-  }
-
-  const data = await response.json();
+  if (!res.ok) throw new Error(`DeepSeek Error (${res.status}): ${await res.text()}`);
+  const data = await res.json();
   return data.choices[0].message.content;
 }
 
+// ─── Google Gemini (REST API) ───
+async function callGemini(messages: ChatMessage[], jsonMode: boolean): Promise<string> {
+  const systemMsg = messages.find(m => m.role === 'system');
+  const userMsgs = messages.filter(m => m.role !== 'system');
+
+  const contents = userMsgs.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  const body: Record<string, unknown> = {
+    contents,
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 2048,
+      ...(jsonMode ? { responseMimeType: 'application/json' } : {})
+    },
+  };
+  if (systemMsg) {
+    body.systemInstruction = { parts: [{ text: systemMsg.content }] };
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Gemini Error (${res.status}): ${await res.text()}`);
+  const data = await res.json();
+
+  if (!data.candidates || !data.candidates[0]) throw new Error('No response from Gemini');
+  return data.candidates[0].content.parts[0].text;
+}
+
+// ─── Groq (OpenAI-compatible) ───
+async function callGroq(messages: ChatMessage[], jsonMode: boolean): Promise<string> {
+  const body: Record<string, unknown> = {
+    model: 'llama-3.3-70b-versatile',
+    messages,
+    temperature: 0.7,
+    max_tokens: 2048,
+  };
+  if (jsonMode) body.response_format = { type: 'json_object' };
+
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Groq Error (${res.status}): ${await res.text()}`);
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+
+// ─── Clean JSON from markdown fences ───
+function cleanJSON(text: string): string {
+  return text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+}
+
+// ─── Oracle: Main Prescription ───
 export const getLithotherapyAdvice = async (problem: string): Promise<Prescription> => {
   const systemPrompt = `You are a warm, professional Lithotherapist with deep expertise in global mineralogy and Indian Gemology (Vedic). You combine ancient Vedic wisdom with modern crystal healing knowledge. Focus on vibrational healing, precision, and spiritual guidance. Always be compassionate and encouraging.
 
@@ -57,16 +140,15 @@ You MUST respond with a valid JSON object (no markdown, no code blocks) with exa
 
   const userPrompt = `As an expert lithotherapist with knowledge of Vedic astrology and gemstone healing, provide a healing prescription for: "${problem}". Include Indian names (Hindi and Telugu), and suggest a specific weight for therapeutic effect. Be warm, spiritual, and detailed.`;
 
-  const result = await callDeepSeek([
+  const result = await callAI([
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userPrompt }
   ], true);
 
-  // Strip potential markdown code blocks
-  const cleaned = result.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  return JSON.parse(cleaned) as Prescription;
+  return JSON.parse(cleanJSON(result)) as Prescription;
 };
 
+// ─── Oracle: Follow-up Conversation ───
 export const getOracleFollowUp = async (
   originalQuery: string,
   prescription: Prescription,
@@ -81,7 +163,7 @@ Wearing instructions: ${prescription.wearingInstructions}
 
 The seeker now asks: "${followUpQuestion}"`;
 
-  const result = await callDeepSeek([
+  const result = await callAI([
     { role: 'system', content: systemPrompt },
     { role: 'user', content: context }
   ], false);
@@ -89,6 +171,7 @@ The seeker now asks: "${followUpQuestion}"`;
   return result.trim();
 };
 
+// ─── Daily Crystal ───
 export const getDailyCrystalReading = async (date: string): Promise<{ crystalName: string; affirmation: string; dayEnergy: string; guidance: string }> => {
   const systemPrompt = `You are a crystal healing oracle. Provide meaningful daily guidance based on metaphysical and astrological principles. You MUST respond with a valid JSON object (no markdown, no code blocks) with exactly these fields:
 {
@@ -98,22 +181,19 @@ export const getDailyCrystalReading = async (date: string): Promise<{ crystalNam
   "guidance": "Specific guidance on how to work with this crystal today (2-3 sentences)"
 }`;
 
-  const result = await callDeepSeek([
+  const result = await callAI([
     { role: 'system', content: systemPrompt },
     { role: 'user', content: `Provide a daily crystal recommendation for ${date}. Consider the day's energy, planetary alignments, and seasonal influences.` }
   ], true);
 
-  const cleaned = result.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  return JSON.parse(cleaned);
+  return JSON.parse(cleanJSON(result));
 };
 
+// ─── Crystal Scanner ───
 export const identifyCrystal = async (base64Image: string): Promise<IdentificationResult> => {
-  // DeepSeek doesn't support vision/image input natively like Gemini.
-  // We'll use a text-based approach where the user describes or we analyze metadata.
-  // For now, we send the image as a data URI in a vision-compatible format.
-  // If DeepSeek doesn't support images, we fall back gracefully.
-
-  const systemPrompt = `You are an expert gemologist and lithotherapist with knowledge of Indian gemology. You MUST respond with a valid JSON object (no markdown, no code blocks) with exactly these fields:
+  // Only Gemini supports vision natively
+  if (currentProvider === 'gemini') {
+    const systemPrompt = `You are an expert gemologist and lithotherapist with knowledge of Indian gemology. You MUST respond with a valid JSON object with exactly these fields:
 {
   "name": "English name of the identified crystal",
   "hindiName": "Name in Hindi",
@@ -124,50 +204,30 @@ export const identifyCrystal = async (base64Image: string): Promise<Identificati
   "history": "A brief mythological or historical fact about the stone"
 }`;
 
-  try {
-    // Try vision-capable endpoint first
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
     const body = {
-      model: MODEL,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image_url',
-              image_url: { url: `data:image/jpeg;base64,${base64Image}` }
-            },
-            {
-              type: 'text',
-              text: 'Identify this crystal/gemstone and provide its lithotherapy properties. Include Hindi and Telugu names.'
-            }
-          ]
-        }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 1024,
+      contents: [{
+        role: 'user',
+        parts: [
+          { inlineData: { mimeType: 'image/jpeg', data: base64Image } },
+          { text: 'Identify this crystal/gemstone and provide its lithotherapy properties. Include Hindi and Telugu names. Respond in JSON only.' }
+        ]
+      }],
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1024, responseMimeType: 'application/json' }
     };
 
-    const response = await fetch(DEEPSEEK_API_URL, {
+    const res = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-
-    if (!response.ok) {
-      throw new Error(`Vision not supported: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const text = data.choices[0].message.content;
-    const cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-    return JSON.parse(cleaned) as IdentificationResult;
-  } catch {
-    // Fallback: DeepSeek may not support vision — inform user
-    throw new Error('Crystal image identification requires a vision-capable model. DeepSeek text model cannot analyze images directly. Try describing the crystal to the Oracle instead.');
+    if (!res.ok) throw new Error(`Gemini Vision Error (${res.status}): ${await res.text()}`);
+    const data = await res.json();
+    const text = data.candidates[0].content.parts[0].text;
+    return JSON.parse(cleanJSON(text)) as IdentificationResult;
   }
+
+  // For non-vision providers, inform the user
+  throw new Error(`Crystal image identification requires Gemini (vision-capable). Please switch to Gemini provider in the dropdown, or describe your crystal to the Oracle instead.`);
 };

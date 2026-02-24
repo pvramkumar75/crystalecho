@@ -23,8 +23,9 @@ const CrystalScanner: React.FC = () => {
             try {
                 const data = await identifyCrystal(base64);
                 setResult(data);
-            } catch {
-                alert("The energy was too clouded to identify. Try a clearer photo.");
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : "The energy was too clouded to identify. Try a clearer photo.";
+                alert(msg);
             } finally {
                 setLoading(false);
             }
